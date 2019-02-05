@@ -4,7 +4,7 @@ Some of the codes in this repository are taken from the [Transmission_Project](h
 
 The codes in this repository are created to analyse transmission events in influenza viruses with short-read data from two timepoints, i.e. one before the transmission (in the donor population) and one after transmission (in the recipient population).   
 
-![](https://github.com/mg878/Bottleneck_Size_Estimation/blob/master/overview.png "Title")
+![](https://github.com/mg878/Bottleneck_Size_Estimation/blob/master/overview.png "Overview")
 
 ## Requirements
 This code requires `Multi_locus_trajectories.out`, `Loci*.dat`, and `Hap_data*.dat` files with an inferred noise parameter `C` from `SAMFIRE`. The files should be available for all the eight (flu type A and B) or seven (C and D) segments of the genome. Create a folder with the name of the segments, i.e. HA, MP, NA, NP, NS, PA, PB1, PB2, and put the corresponding files (mentioned above) into each folder. If some of the segments do not contain a variant, i.e. `Multi_locus_trajectories.out` is empty, please create the corresponding folder and leave it empty.
@@ -74,4 +74,11 @@ for t in `seq 0 7`; do
    cd ..
 done 
 ```
-This calculates the liklihood function 
+For each gene segment, this calculates the likelihood distribution with bottleneck sizes ranging from 1 to 1000 and stores it in `Transmission1_bottleneck/segment_$t/likelihood_distribution.txt` and their corresponding maximum likelihood value in `maximum_likelihood.txt` in the same directory.
+* **Finally**, to calculate the find the likelihood distriubtion and maximum likelihood value for `Transmission1`, type:
+```bash
+cd /rds/user/mg878/hpc-work/package_lab/Transmission1_bottleneck
+cat */likelihood.txt > catted_likelihoods.txt
+/rds/user/mg878/hpc-work/package_lab/./run_avg_bottleneck catted_likelihoods.txt Transmission1_overal_likelihood.txt Transmission1_maximum_likelihood.txt
+```
+where we first concatenated all the `likelihood_distribution.txt` files into `catted_likelihoods.txt` and then stored the likelihood distribution in `Transmission1_overal_likelihood.txt` and its maxmimum likelihood value in `Transmission1_maximum_likelihood.txt`.
