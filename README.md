@@ -77,8 +77,8 @@ done
 For each gene segment, this calculates the likelihood distribution with bottleneck sizes ranging from 1 to 1000 and stores it in `Transmission1_bottleneck/segment_$t/likelihood_distribution.txt` and their corresponding maximum likelihood value in `maximum_likelihood.txt` in the same directory.
 * **Finally**, to calculate the find the likelihood distriubtion and maximum likelihood value for `Transmission1`, type:
 ```bash
-cd /rds/user/mg878/hpc-work/package_lab/Transmission1_bottleneck
+cd /path/to/directory/Transmission1_bottleneck
 cat */likelihood.txt > catted_likelihoods.txt
-/rds/user/mg878/hpc-work/package_lab/./run_avg_bottleneck catted_likelihoods.txt Transmission1_overal_likelihood.txt Transmission1_maximum_likelihood.txt
+/path/to/directory/Codes/./run_avg_bottleneck catted_likelihoods.txt Transmission1_overal_likelihood.txt Transmission1_maximum_likelihood.txt
 ```
 where we first concatenated all the `likelihood_distribution.txt` files into `catted_likelihoods.txt` and then stored the likelihood distribution in `Transmission1_overal_likelihood.txt` and its maxmimum likelihood value in `Transmission1_maximum_likelihood.txt`.
