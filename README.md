@@ -4,7 +4,7 @@ Some of the codes in this repository are taken from the [Transmission_Project](h
 
 The codes in this repository are created to analyse transmission events in influenza viruses with short-read data from two timepoints, i.e. one before the transmission (in the donor population) and one after transmission (in the recipient population).   
 
-<div style="text-align:center"><img src="overview.png" width="420"></div>
+<img align="center" src="overview.png" width="420">
 
 ## Requirements
 This code requires `Multi_locus_trajectories.out`, `Loci*.dat`, and `Hap_data*.dat` files with an inferred noise parameter `C` from `SAMFIRE`. The files should be available for all the eight (flu type A and B) or seven (C and D) segments of the genome. Create a folder with the name of the segments, i.e. HA, MP, NA, NP, NS, PA, PB1, PB2, and put the corresponding files (mentioned above) into each folder. If some of the segments do not contain a variant, i.e. `Multi_locus_trajectories.out` is empty, please create the corresponding folder and leave it empty.
