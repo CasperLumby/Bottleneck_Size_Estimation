@@ -4,6 +4,8 @@ Some of the codes in this repository are taken from the [Transmission_Project](h
 
 The codes in this repository are created to analyse transmission events in influenza viruses with short-read data from two timepoints, i.e. one before the transmission (in the donor population) and one after transmission (in the recipient population).   
 
+<img src="overview.png" width="180">
+
 ## Requirements
 This code requires `Multi_locus_trajectories.out`, `Loci*.dat`, and `Hap_data*.dat` files with an inferred noise parameter `C` from `SAMFIRE`. The files should be available for all the eight (flu type A and B) or seven (C and D) segments of the genome. Create a folder with the name of the segments, i.e. HA, MP, NA, NP, NS, PA, PB1, PB2, and put the corresponding files (mentioned above) into each folder. If some of the segments do not contain a variant, i.e. `Multi_locus_trajectories.out` is empty, please create the corresponding folder and leave it empty.
 
@@ -54,7 +56,7 @@ done
 ```
 This creates a directory `Transmission1_qStarStar` with all the inferred haplotype frequencies q** (taken from x*) stored in folders `Seed_$s` where `$s` goes from 1 to 100 to cover all the 100 replicate samples.
 
-We then concatenate the inferred frequencies of each segment across the 100 replicate samples and store them in a new folder called `Transmission1_bottleneck` with 8 subfolders, `segment_$t`, and file name `test_$t` (where `$t` varies from 0 to 7) by typing the following in the command line:
+We then concatenate the inferred frequencies of each segment across the 100 replicates and store them in a new folder called `Transmission1_bottleneck` with 8 subfolders corresponding to each gene segment, `segment_$t`, and concatenated file name `test_$t.txt` (where `$t` varies from 0 to 7) by typing the following in the command line:
 ```bash
 mkdir Transmission1_bottleneck
 for t in `seq 0 7`; do
@@ -64,4 +66,12 @@ for t in `seq 0 7`; do
    cat /path/to/directory/Transmission1_qStarStar/*/qStarStar_$t.txt > /path/to/directory/Transmission1_bottleneck/segment_$t/test_$t.txt
 done 
 ```
-
+* **The fourth step is** to calculate the bottleneck size for each segment by typing:
+```bash
+for t in `seq 0 7`; do
+   cd /path/to/directory/Transmission1_bottleneck/segment_$t/
+   /path/to/directory/Codes/./run_bottleneck /path/to/directory/Transmission1_qStar/test_$t/outcome_1.txt /path/to/directory/Transmission1_bottleneck/segment_$t/test_$t.txt likelihood_distribution.txt
+   cd ..
+done 
+```
+This calculates the liklihood function 
