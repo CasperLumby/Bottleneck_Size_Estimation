@@ -1,14 +1,14 @@
 # Estimating the bottleneck size using MLHapRec 
 This repository contains a series of codes to infer the bottleneck size from short-read data using the haplotype reconstruction package `MLHapRec`.
-Parts of codes are taken from the [Transmission_Project](https://bitbucket.org/casperlu/transmission_project) by C. K. Lumby and [SAMFIRE](https://github.com/cjri/samfire) by C. J. R. Illingworth.
+Some of the codes in this repository are taken from the [Transmission_Project](https://bitbucket.org/casperlu/transmission_project) by C. K. Lumby and [SAMFIRE](https://github.com/cjri/samfire) by C. J. R. Illingworth.
 
-These codes are developed for the purpose of studying transmission events in influenza virus with short-read data from two timepoints, i.e. one before the transmission in the donor population and one after in the recipient population.   
+The codes in this repository are created to analyse transmission events in influenza viruses with short-read data from two timepoints, i.e. one before the transmission (in the donor population) and one after transmission (in the recipient population).   
 
 ## Requirements
 This code requires `Multi_locus_trajectories.out`, `Loci*.dat`, and `Hap_data*.dat` files with an inferred noise parameter `C` from `SAMFIRE`. The files should be available for all the eight (flu type A and B) or seven (C and D) segments of the genome. Create a folder with the name of the segments, i.e. HA, MP, NA, NP, NS, PA, PB1, PB2, and put the corresponding files (mentioned above) into each folder. If some of the segments do not contain a variant, i.e. `Multi_locus_trajectories.out` is empty, please create the corresponding folder and leave it empty.
 
 ## Usage
-To explain how to use this package and its features, we now consider the following example:
+To explain the features of this package, we consider the following example:
 Suppose we have a dataset with one transmission event (we will later discuss how to deal with larger datasets). We store all the required files in a folder called `Transmission1`. 
 
 * **The first step is** to construct the underlying haplotypes in each segment, q*, by typing the following in the command line:
@@ -53,3 +53,15 @@ for s in `seq 1 100`; do #this varies from 1 to the total number of replicate sa
 done 
 ```
 This creates a directory `Transmission1_qStarStar` with all the inferred haplotype frequencies q** (taken from x*) stored in folders `Seed_$s` where `$s` goes from 1 to 100 to cover all the 100 replicate samples.
+
+We then concatenate the inferred frequencies of each segment across the 100 replicate samples and store them in a new folder called `Transmission1_bottleneck` with 8 subfolders, `segment_$t`, and file name `test_$t` (where `$t` varies from 0 to 7) by typing the following in the command line:
+```bash
+mkdir Transmission1_bottleneck
+for t in `seq 0 7`; do
+   cd Transmission1_bottleneck
+   mkdir segment_$t
+   cd ..
+   cat /path/to/directory/Transmission1_qStarStar/*/qStarStar_$t.txt > /path/to/directory/Transmission1_bottleneck/segment_$t/test_$t.txt
+done 
+```
+
