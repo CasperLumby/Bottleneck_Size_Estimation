@@ -25,8 +25,18 @@ for i in HA MP NA NP NS PA PB1 PB2; do #these are the names of the folders for t
 	t=`expr $t + 1`
 done 
 ```
-This creates a folder named `Transmission1_qStar` *(make sure the folder is in your local directory where other project folders, including Transmission1, are located)* which contains 8 subfolders named `test_0`, `test_1`, ..., and `test_7` with the corresponding reconstructed haplotype sets saved in the `outcome_1.txt` for each segment `HA`, `MP`, `NA`, `NP`, `NS`, `PA`, `PB1`, and `PB2`, respectively.
+This creates a folder named `Transmission1_qStar` *(make sure the folder is in your local directory where other folders, including Transmission1, are located)* which contains 8 subfolders named `test_0`, `test_1`, ..., and `test_7` with the corresponding reconstructed haplotype sets saved in the `outcome_1.txt` for each segment `HA`, `MP`, `NA`, `NP`, `NS`, `PA`, `PB1`, and `PB2`, respectively.
 
 Note that this step could take several minutes (hours) depending on how large your Multi_locus_trajectories.out files are.
 
-* **The second step is** 
+* **The second step is** to create simulated short-read data, x*, by typing:
+```bash
+C=660 #change this to your inferred noise parameter 
+for s2 in `seq 1 100`; do
+## Update path to .run file
+/path/to/directory/Codes/Codes_for_xStar/SimRealObsCount.run -if /path/to/directory/Transmission1 -of /path/to/directory/Transmission1_xStar -simOnly true -importHapsMahan /path/to/directory/Transmission1_qStar -format Mahan -rmMonoSim false -C $C -ss $s2 -filterData False 
+done 
+```
+This creates a folder named `Transmission1_xStar` which contains 100 replica of the `Multi_locus_trajectories.out` for each segment of `Transmission1` assuming a noise parameter `C=660` -- You can change the total number of replica from 100 to any number by changing the for loop `for s2 in seq 1 NUMBER; do` and the noise parameter `C=VALUE`. 
+
+It assumes that the total number of reads 
