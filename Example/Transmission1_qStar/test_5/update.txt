@@ -1,0 +1,21 @@
+------------------------------------------------------------------
+***ROUND 1***
+number of haplotypes are currently = 1
+maximum log-likelihood value = -13.1626
+
+below is the current list of candidate haplotypes:
+<optimised haplotype> | <donor frequency> | <recipient frequency> | 
+T	0.99	0.999158
+------------------------------------------------------------------
+------------------------------------------------------------------
+***ROUND 2***
+number of haplotypes are currently = 2
+maximum log-likelihood value = -10.6487
+
+below is the current list of candidate haplotypes:
+<optimised haplotype> | <donor frequency> | <recipient frequency> | 
+T	0.978911	0.999159
+A	0.0210887	1e-11
+------------------------------------------------------------------
+The optimisation process stops here.
+The BIC in ROUND 2 is negative

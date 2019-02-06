@@ -1,0 +1,19 @@
+------------------------------------------------------------------
+***ROUND 1***
+number of haplotypes are currently = 1
+maximum log-likelihood value = -32.7663
+
+below is the current list of candidate haplotypes:
+<optimised haplotype> | <donor frequency> | <recipient frequency> | 
+A	0.998482	0.99
+------------------------------------------------------------------
+------------------------------------------------------------------
+***ROUND 2***
+number of haplotypes are currently = 2
+maximum log-likelihood value = -14.1363
+
+below is the current list of candidate haplotypes:
+<optimised haplotype> | <donor frequency> | <recipient frequency> | 
+A	0.998482	0.946607
+G	0.00151794	0.0533933
+------------------------------------------------------------------
