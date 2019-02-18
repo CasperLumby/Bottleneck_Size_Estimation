@@ -44,6 +44,7 @@ This creates a folder named `Transmission1_xStar` which contains 100 replica of 
 
 * **The third step is** to infer the frequency of the reconstructed haplotypes for each replicate sample x*. We call this the q** set. Note that in this step, no haplotype reconstruction takes place, but we rather (re)infer the *frequency* of our initially reconstructed haplotype set `Transmission1_qStar` by typing the following commands:
 ```bash
+C=660 #change this to your inferred noise parameter 
 mkdir Transmission1_qStarStar  #making a directory to deposit all the re-inferred haplotype frequencies q**
 for s in `seq 1 100`; do #this varies from 1 to the total number of replicate samples which, in this case, we set to be equal to 100
    echo $s
@@ -51,7 +52,7 @@ for s in `seq 1 100`; do #this varies from 1 to the total number of replicate sa
    mkdir Seed_$s #making a directory to deposit the re-inferred frequencies of set $s
    cd ..
    for t in `seq 0 7`; do
-   Codes/./run_qstarstar /path/to/directory/Transmission1_xStar/Seed_$s/SimulatedData_Mahan_Gene_$t.dat /path/to/directory/Transmission1_qStar/test_$t/outcome_1.txt /path/to/directory/Transmission1_qStarStar/Seed_$s qStarStar_$t.txt 660
+   Codes/./run_qstarstar /path/to/directory/Transmission1_xStar/Seed_$s/SimulatedData_Mahan_Gene_$t.dat /path/to/directory/Transmission1_qStar/test_$t/outcome_1.txt /path/to/directory/Transmission1_qStarStar/Seed_$s qStarStar_$t.txt $C
    done
 done 
 ```
