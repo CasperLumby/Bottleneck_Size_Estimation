@@ -83,4 +83,4 @@ cd /path/to/directory/Transmission1_bottleneck
 cat */likelihood_distribution.txt > catted_likelihoods.txt
 /path/to/directory/Codes/./run_avg_bottleneck catted_likelihoods.txt Transmission1_overall_likelihood.txt Transmission1_maximum_likelihood.txt
 ```
-where we first concatenated all the `likelihood_distribution.txt` files into `catted_likelihoods.txt` and then calculated the likelihood distribution for `Transmission1` in `Transmission1_overal_likelihood.txt` and its maxmimum likelihood value in `Transmission1_maximum_likelihood.txt`.
+where we first concatenated all the `likelihood_distribution.txt` files into `catted_likelihoods.txt` and then calculated the likelihood distribution for `Transmission1` in `Transmission1_overall_likelihood.txt` and its maxmimum likelihood value in `Transmission1_maximum_likelihood.txt`.
