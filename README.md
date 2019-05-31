@@ -72,7 +72,7 @@ done
 ```bash
 for t in `seq 0 7`; do
    cd /path/to/directory/Transmission1_bottleneck/segment_$t/
-   /path/to/directory/Codes/./run_bottleneck /path/to/directory/Transmission1_qStar/test_$t/outcome_1.txt /path/to/directory/Transmission1_bottleneck/segment_$t/test_$t.txt likelihood_distribution.txt
+   /path/to/directory/Codes/./run_bottleneck /path/to/directory/Transmission1_qStar/test_$t/outcome_1.txt /path/to/directory/Transmission1_bottleneck/segment_$t/test_$t.txt
    cd ..
 done 
 ```
