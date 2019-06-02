@@ -52,11 +52,11 @@ for s in `seq 1 100`; do #this varies from 1 to the total number of replicate sa
    mkdir Seed_$s #making a directory to deposit the re-inferred frequencies of set $s
    cd ..
    for t in `seq 0 7`; do
-   Codes/./run_qstarstar /path/to/directory/Transmission1_xStar/Seed_$s/SimulatedData_Mahan_Gene_$t.dat /path/to/directory/Transmission1_qStar/test_$t/outcome_1.txt /path/to/directory/Transmission1_qStarStar/Seed_$s qStarStar_$t.txt $C
+   Codes/./run_qstarstar /path/to/directory/Transmission1_xStar/Seed_$s/SimulatedData_Mahan_Gene_$t.dat /path/to/directory/Transmission1_qStar/test_$t/outcome_1.txt /path/to/directory/Transmission1_qStarStar/Seed_$s qStarStar_$t.txt $C 0
    done
 done 
 ```
-This creates a directory `Transmission1_qStarStar` with all the inferred haplotype frequencies q** (taken from x*) stored in folders `Seed_$s` where `$s` goes from 1 to 100 to cover all the 100 replicate samples.
+This creates a directory `Transmission1_qStarStar` with all the inferred haplotype frequencies q** (taken from x*) stored in folders `Seed_$s` where `$s` goes from 1 to 100 to cover all the 100 replicate samples. Note that the last entry is the seed number (in this case, the user did not wish to give a particular seed number, so they put 0 instead).
 
 We then concatenate the inferred frequencies of each segment across the 100 replicates and store them in a new folder called `Transmission1_bottleneck` with 8 subfolders corresponding to each gene segment, `segment_$t`, and concatenated file names `test_$t.txt` (where `$t` varies from 0 to 7) by typing the following in the command line:
 ```bash
