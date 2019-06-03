@@ -20,65 +20,65 @@ using namespace std;
 
 int main(int argc, char* argv[])
 {
-	freopen(argv[3],"w",stdout); //print out the progress of the optimisation process in a file called update.txt
-	vector<string> table;
+	//first check if the input format is right
+	if(argc != 4) { 
+		cout << "Error in the input format: " << endl << "Please provide the names for your concatenated likelihood file, full likelihood distribution, and the bottleneck size with maximum likelihood value, respectively." << endl;
+		return false;
+	}
+	
+	if(argc == 4) { 
+		cout << "avg_bottleneck is now initiated..." << endl;
+	}
+	
+	freopen(argv[3],"w",stdout); //This writes the stdout output to Transmission1_maximum_likelihood.txt
+	vector<string> likelihoodsString; //Likelihoods in string form
+	vector<double> likelihoods; //Likelihoods as doubles
 	ifstream bottleneck;
-	bottleneck.open(argv[1]); // a catted list of all likelihoods for one Transmission event with seven segments
+	bottleneck.open(argv[1]); // a concatenated list of all likelihoods for one Transmission event with seven segments
 	while (!bottleneck.eof())
 	{
 		string line;
 		getline(bottleneck, line);
-		table.push_back(line);
+		likelihoodsString.push_back(line);
+		likelihoods.push_back(atof(line.c_str()));
 	}
 	bottleneck.close();
 	
-	vector <double> row;
-	for (unsigned int i = 0; i < table.size(); i++)
-	{
-		istringstream iss(table[i]);
-		string term;
-		while (iss >> term)
-		{
-			double num_1 = atof(term.c_str());
-			row.push_back(num_1);
-		}
-	}
-	
 	vector<double> likelihood(1000, 1);
-	double counter = 0;	
-	for (unsigned int i = 0; i < row.size(); i++)
+	double index = 0;	
+	for (unsigned int i = 0; i < likelihoods.size(); i++)
 	{
 		if((i+1)%1000 != 0) //every 1000 row belong to the likelihood of one segment.
 		{
-			likelihood[counter] += row[i];
-			counter++;
+			likelihood[index] += likelihoods[i];
+			index++;
 		}
 		
 		else if((i+1)%1000 == 0)
 		{
-			likelihood[counter] += row[i];
-			counter = 0;
+			likelihood[index] += likelihoods[i];
+			index = 0;
 		}
 	}
 	
-	double Max_finder = -1e9;
-	double Max_finder_count = 0;
+	double Max_finder = std::numeric_limits<double>::lowest();
+	double Max_finder_index = 0;
 	for (unsigned int i = 0; i < likelihood.size(); i++)
 	{
 		if (likelihood[i] > Max_finder)
 		{
-			Max_finder_count = i+1;
+			Max_finder_index = i+1;
 			Max_finder = likelihood[i];
 		}
 	}
 	
-	if (Max_finder_count!=0)
+	if (Max_finder_index!=0)
 	{	
-		cout << Max_finder_count << endl;
+		cout << Max_finder_index << endl; //This is the mean bottleneck size of the transmission pair and the information is saved in argv[3].txt
 	}
 	
 	ofstream myfile;
-	myfile.open(argv[2]); //
+	myfile.open(argv[2]); //This is the full likelihood distribution of the bottleneck estimates (from 1 to 1000) for this transmission pair
 	for (unsigned int i = 0; i < likelihood.size(); i++)
 	{
 		myfile << likelihood[i] << endl;
