@@ -40,7 +40,7 @@ for s2 in `seq 1 100`; do
 /path/to/directory/Codes/Codes_for_xStar/SimRealObsCount.run -if /path/to/directory/Transmission1 -of /path/to/directory/Transmission1_xStar -simOnly true -importHapsMahan /path/to/directory/Transmission1_qStar -format Mahan -rmMonoSim false -C $C -ss $s2 -filterData False 
 done 
 ```
-This creates a folder named `Transmission1_xStar` which contains 100 replica of the `Multi_locus_trajectories.out` for each segment of `Transmission1` assuming a noise parameter `C=660` and a fixed random seed generator `-ss $s2` for each replicate sample -- You can change the total number of replica by changing the for loop `for s2 in seq 1 NUMBER; do` and the noise parameter `C=VALUE`. A detailed explanation of what each flag does can be found [here](https://bitbucket.org/casperlu/transmission_project/).  
+This creates a folder named `Transmission1_xStar` which contains 100 replica of the `Multi_locus_trajectories.out` for each segment of `Transmission1` assuming a noise parameter `C=660` and a fixed random \ generator `-ss $s2` for each replicate sample -- You can change the total number of replica by changing the for loop `for s2 in seq 1 NUMBER; do` and the noise parameter `C=VALUE`. A detailed explanation of what each flag does can be found [here](https://bitbucket.org/casperlu/transmission_project/).  
 
 * **The third step is** to infer the frequency of the reconstructed haplotypes for each replicate sample x*. We call this the q** set. Note that in this step, no haplotype reconstruction takes place, but we rather (re)infer the *frequency* of our initially reconstructed haplotype set `Transmission1_qStar` by typing the following commands:
 ```bash
@@ -52,11 +52,11 @@ for s in `seq 1 100`; do #this varies from 1 to the total number of replicate sa
    mkdir Seed_$s #making a directory to deposit the re-inferred frequencies of set $s
    cd ..
    for t in `seq 0 7`; do
-   Codes/./run_qstarstar /path/to/directory/Transmission1_xStar/Seed_$s/SimulatedData_Mahan_Gene_$t.dat /path/to/directory/Transmission1_qStar/test_$t/outcome_1.txt /path/to/directory/Transmission1_qStarStar/Seed_$s qStarStar_$t.txt $C 0
+   Codes/./run_qstarstar /path/to/directory/Transmission1_xStar/Seed_$s/SimulatedData_Mahan_Gene_$t.dat /path/to/directory/Transmission1_qStar/test_$t/outcome_1.txt /path/to/directory/Transmission1_qStarStar/Seed_$s qStarStar_$t.txt $C
    done
 done 
 ```
-This creates a directory `Transmission1_qStarStar` with all the inferred haplotype frequencies q** (taken from x*) stored in folders `Seed_$s` where `$s` goes from 1 to 100 to cover all the 100 replicate samples. Note that the last entry is the seed number (in this case, the user did not wish to give a particular seed number, so they put 0 instead).
+This creates a directory `Transmission1_qStarStar` with all the inferred haplotype frequencies q** (taken from x*) stored in folders `Seed_$s` where `$s` goes from 1 to 100 to cover all the 100 replicate samples.
 
 We then concatenate the inferred frequencies of each segment across the 100 replicates and store them in a new folder called `Transmission1_bottleneck` with 8 subfolders corresponding to each gene segment, `segment_$t`, and concatenated file names `test_$t.txt` (where `$t` varies from 0 to 7) by typing the following in the command line:
 ```bash
