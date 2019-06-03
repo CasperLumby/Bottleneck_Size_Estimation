@@ -1,10 +1,10 @@
 # Estimating the bottleneck size using MLHapRec 
-This repository contains a series of codes to infer the bottleneck size from short-read data using the haplotype reconstruction package `MLHapRec`.
+This repository contains a series of codes to infer the bottleneck size from short-read data using the haplotype reconstruction package [`MLHapRec`](https://github.com/mg878/Haplotype_Reconstruction).
 Some of the codes in this repository are taken from the [Transmission_Project](https://bitbucket.org/casperlu/transmission_project) by C. K. Lumby and [SAMFIRE](https://github.com/cjri/samfire) by C. J. R. Illingworth.
 
 This project is developed to analyse the transmission bottleneck size of influenza viruses using short-read data from two timepoints, i.e. one before the transmission (in the donor) and one after transmission (in the recipient).   
 
-![](https://github.com/mg878/Bottleneck_Size_Estimation/blob/master/overview.png "Overview")
+![text here](https://github.com/mg878/Bottleneck_Size_Estimation/blob/master/overview.png "Overview")
 
 ## Requirements
 This project requires `Multi_locus_trajectories.out`, `Loci*.dat`, and `Hap_data*.dat` files with an inferred noise parameter `C` from `SAMFIRE`. The files should be available for all the eight (flu type A and B) or seven (C and D) segments of the genome. Create a folder with the name of the segments, i.e. HA, MP, NA, NP, NS, PA, PB1, PB2, and put the corresponding files (mentioned above) into each folder. If some of the segments do not contain a variant, i.e. `Multi_locus_trajectories.out` is empty, please create the corresponding folder and leave it empty.
