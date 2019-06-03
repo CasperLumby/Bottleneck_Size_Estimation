@@ -19,18 +19,6 @@
 #include <sys/stat.h>
 using namespace std;
 
-struct container_is_empty_t {
-	template<class C>
-	bool operator()(C const& c)const {
-		return c.empty();
-	}
-	template<class T, size_t N>
-	bool operator()(T(&)[N])const {
-		return N > 0;
-	}
-};
-static container_is_empty_t const container_is_empty;
-
 //Normalise the frequency of haplotypes to 1
 void NormaliseFreqs(vector<double> &init_freqs)
 {
@@ -104,66 +92,65 @@ double Dirichlet_m(double timepoint, vector<string> haplotypes, vector<double> f
 	{
 		vector<double> inf; //contains the sum of the frequencies of all contributing candidate haplotypes for each of the j members of the ith partial haplotype set
 		vector<double> nn; //contains the corresponding total number of reads for each member of inf vector
-		vector<double> temp = q;
-		temp.erase(remove(temp.begin(), temp.end() - 1, q[candidates_size]));//erase the unkknown haplotype qx out of the frequency list 
-		unsigned int check = 0;
-		vector<double> majorCheckvec;
-		double NUM1 = 0;
-		double sum_nn = 0;
-		unsigned int majorCheck1 = 0;
-		vector<double> vaccum_holder;
-		for (unsigned int j = 0; j<(CONTRIBS[i]).size(); j++)
+		vector<double> qCopy = q; //copy of the input frequencies, freq
+		qCopy.erase(remove(qCopy.begin(), qCopy.end() - 1, q[candidates_size]));//erase the unkknown haplotype qx out of the copy of the frequency list, qCopy. 
+		unsigned int count_no_contrib = 0; //counts the number of haplotypes with no contribution to a partial haplotype read
+		double no_contrib_reads = 0; //partial haplotype reads with no matching haplotype that contributes
+		vector<double> no_contrib_haps; //list of all haplotype frequencies that do not contribute
+		vector<double> contrib_haps; //list of all haplotype frequencies that contribute
+		double contrib_reads = 0; //partial haplotype reads with, at least, one matching haplotype that contributes
+		unsigned int count_contrib = 0; //counts the number of haplotypes contributing to a partial haplotype read
+		double sum_nn = 0; //adds the number of reads
+		//the following loop goes over all the haplotypes that contribute to the reads of a given partial haplotype set
+		for (unsigned int j = 0; j<(CONTRIBS[i]).size(); j++) 
 		{
 			double sum = 0;
-			int majorCheck = 0;
-			for (unsigned int k = 0; k<(CONTRIBS[i][j]).size(); k++)
+			int count_if_any_contrib = 0; //checks, for each partial haplotype, if any haplotype contributes
+			for (unsigned int k = 0; k<(CONTRIBS[i][j]).size(); k++)//this loop adds the frequency of all the haplotypes that share the same partial haplotype of interest
 			{
-				//add the frequency of all the haplotypes that share the same partial haplotype of interest
-				if (!(CONTRIBS[i][j]).empty())
-				{
-					sum += q[(CONTRIBS[i][j][k])];//add the frequency of all haplotypes that contribute to the ith partial haplotype set (CONTRIBS[i][j][k] = ith partial haplotype set, jth element, kth contributing haplotype)
-					majorCheck++;
-					majorCheck1++;
-					majorCheckvec.push_back(q[(CONTRIBS[i][j][k])]);
-				}
+				//the if clause below insures that we add the frequency of all haplotypes that contribute to the ith partial haplotype set (CONTRIBS[i][j][k] = ith partial haplotype set, jth element, kth contributing haplotype) 
+				sum += q[(CONTRIBS[i][j][k])];
+				count_if_any_contrib++;
+				count_contrib++;
+				contrib_haps.push_back(q[(CONTRIBS[i][j][k])]);
 			}
 			//if none of the candidate haplotypes match with the partial haplotype of interest (i.e. do not 'contribute' to that partial haplotype set), the corresponding reads for that partial haplotype goes to the unknown haplotype qx)
 			if ((CONTRIBS[i][j]).empty())
 			{
-				check++;
+				count_no_contrib++;
 				double SIZE1_1 = (partitions[i][j]).size();
-				NUM1 = atoi((partitions[i][j]).at(SIZE1_1 - timepoint).c_str());
-				sum_nn += NUM1;
-				vaccum_holder.push_back(NUM1);
+				no_contrib_reads = atoi((partitions[i][j]).at(SIZE1_1 - timepoint).c_str());
+				sum_nn += no_contrib_reads;
+				no_contrib_haps.push_back(no_contrib_reads);
 			}
 			//if, at least, there were one candidate haplotype that contributed to the ith partial haplotype set, uptade nn and inf
-			if (majorCheck != 0)
+			if (count_if_any_contrib != 0)
 			{
 				inf.push_back(sum);
 				double SIZE = (partitions[i][j]).size();
-				double NUM = atoi((partitions[i][j]).at(SIZE - timepoint).c_str());
-				nn.push_back(NUM);
+				contrib_reads = atoi((partitions[i][j]).at(SIZE - timepoint).c_str());
+				nn.push_back(contrib_reads);
 			}
 		}
 		//if the candidate haplotypes covered all the partial haplotypes in the ith set, then there are zero reads left to be attributed to qx
-		if (check == 0 && majorCheck1 == temp.size())
+		if (count_no_contrib == 0 && count_contrib == qCopy.size())
 		{
 			inf.push_back(q[candidates_size]);
 			nn.push_back(0.0);
 		}
-		unsigned int check2 = 0;
+		unsigned int check2 = 0; 
 		
 		//if some (but not all) of the candidate haplotypes covered the entire partial haplotype set i, the remaining candidates would correspond to zero reads (so as the qx haplotype)
-		if (check == 0 && majorCheck1 != temp.size())
+		if (count_no_contrib == 0 && count_contrib != qCopy.size())
 		{
-			for (unsigned int m = 0; m < majorCheckvec.size(); m++)
+			for (unsigned int m = 0; m < contrib_haps.size(); m++)//this loop finds all the haplotypes that do not contribute and removes their frequencies from qCopy
 			{
-				temp.erase(remove(temp.begin(), temp.end() - 1, majorCheckvec[m]));
+				qCopy.erase(remove(qCopy.begin(), qCopy.end() - 1, contrib_haps[m]));
 			}
 			double temp_sum = 0;
-			for (unsigned int g = 0; g < temp.size(); g++)
+			for (unsigned int g = 0; g < qCopy.size(); g++)
 			{
-				temp_sum += temp[g];
+				temp_sum += qCopy[g];
 			}
 			inf.push_back(temp_sum);
 			nn.push_back(0.0);
@@ -174,18 +161,18 @@ double Dirichlet_m(double timepoint, vector<string> haplotypes, vector<double> f
 		
 		//if some (but not all) of the candidate haplotypes did not contribute to the ith set, then they correspond to zero reads and the remaining unidentified partial haplotypes go to qx
 		unsigned int check3 = 0;
-		if (check != 0 && majorCheck1 != temp.size() && majorCheck1 != 0 && check2 == 0)
+		if (count_no_contrib != 0 && count_contrib != qCopy.size() && count_contrib != 0 && check2 == 0)
 		{
-			for (unsigned int m = 0; m < majorCheckvec.size(); m++)
+			for (unsigned int m = 0; m < contrib_haps.size(); m++)
 			{
-				temp.erase(remove(temp.begin(), temp.end() - 1, majorCheckvec[m]));
+				qCopy.erase(remove(qCopy.begin(), qCopy.end() - 1, contrib_haps[m]));
 			}
 			double temp_sum = 0;
-			for (unsigned int g = 0; g < temp.size(); g++)
+			for (unsigned int g = 0; g < qCopy.size(); g++)
 			{
-				temp_sum += temp[g];
+				temp_sum += qCopy[g];
 			}
-			double total = accumulate(vaccum_holder.begin(), vaccum_holder.end(), 0);
+			double total = accumulate(no_contrib_haps.begin(), no_contrib_haps.end(), 0);
 			inf.push_back(temp_sum);
 			nn.push_back(0.0);
 			inf.push_back(q[candidates_size]);
@@ -193,14 +180,14 @@ double Dirichlet_m(double timepoint, vector<string> haplotypes, vector<double> f
 			check3++;
 		}
 		//if non of the candidate haplotypes contributed to ith set, then they all correspond to zero reads and everything else would be classified as qx
-		if (check != 0 && majorCheck1 != temp.size() && majorCheck1 == 0 && check2 == 0 && check3 == 0)
+		if (count_no_contrib != 0 && count_contrib != qCopy.size() && count_contrib == 0 && check2 == 0 && check3 == 0)
 		{
 			double temp_sum = 0;
-			for (unsigned int g = 0; g < temp.size(); g++)
+			for (unsigned int g = 0; g < qCopy.size(); g++)
 			{
-				temp_sum += temp[g];
+				temp_sum += qCopy[g];
 			}
-			double total = accumulate(vaccum_holder.begin(), vaccum_holder.end(), 0);
+			double total = accumulate(no_contrib_haps.begin(), no_contrib_haps.end(), 0);
 			inf.push_back(q[candidates_size]);
 			nn.push_back(total);
 			inf.push_back(temp_sum);
@@ -208,24 +195,24 @@ double Dirichlet_m(double timepoint, vector<string> haplotypes, vector<double> f
 		}
 
 		//if all the candidate haplotypes covered some of the partial haplotypes, then all the remaining reads correspond to qx.
-		if (check != 0 && majorCheck1 == temp.size() && check2 == 0 && check3 == 0)
+		if (count_no_contrib != 0 && count_contrib == qCopy.size() && check2 == 0 && check3 == 0)
 		{
 			inf.push_back(q[candidates_size]);
 			nn.push_back(sum_nn);
 		}
 		ULTIMA_THULE += Likelihood(c, nn, inf);
-		temp = q;
+		qCopy = q; //resetting the copy of the original frequencies
 	}
 	return ULTIMA_THULE;
 }
 
 //For a candidate haplotype set, this function finds an optimal frequency given the short-read data collected from Multi_locus_trajectories.out file and returns the log-likelihood value for that set
-double OptimumFreqs(double timepoint, vector<string> &candidates, vector<double> &init_freqs, vector<vector<vector<int>>> &CONTRIBS, vector<vector<vector<string>>> &partitions, double c)
+double OptimumFreqs(double timepoint, vector<string> &candidates, vector<double> &init_freqs, vector<vector<vector<int>>> &CONTRIBS, vector<vector<vector<string>>> &partitions, double c, int temp_seed)
 {
 	gsl_rng_env_setup();
 	gsl_rng *rgen = gsl_rng_alloc(gsl_rng_taus);
-	int seed = (int)time(NULL);
-	gsl_rng_set(rgen, seed);
+	//int seed = (int)time(NULL);
+	gsl_rng_set(rgen, temp_seed);
 	double init_size = init_freqs.size();
 	vector<double> init_freqs_store = init_freqs;
 	double L = -1e7; //initial (extremely low) value for the likelihood
@@ -236,8 +223,10 @@ double OptimumFreqs(double timepoint, vector<string> &candidates, vector<double>
 
 	for (unsigned int it = 0; it < max_it; it++)
 	{
-		double r = 2 * (gsl_rng_uniform(rgen) - 0.5);//random direction between -1 to +1
-		int j = floor(init_freqs.size()*gsl_rng_uniform(rgen));
+		double s = gsl_rng_uniform_int(rgen,1000000)+1;
+		s = s/(1000000);//a random number between zero and 1 discretised for 1 part per million 
+		double r = 2 * (s - 0.5);//random direction between -1 to +1
+		int j = floor(init_freqs.size()*s);
 		init_freqs[j] = init_freqs[j] + (r*changex);
 
 		for (unsigned int i = 0; i < init_size; i++)
@@ -277,7 +266,7 @@ double OptimumFreqs(double timepoint, vector<string> &candidates, vector<double>
 			init_freqs = init_freqs_store;
 			check++;
 		}
-		if (check >= 50)//50 is found heuristically from testing multiple simulations
+		if (check >= 50)//50 is found heuristically to be sufficient (from testing multiple simulations)
 		{
 			break;
 		}
@@ -285,15 +274,77 @@ double OptimumFreqs(double timepoint, vector<string> &candidates, vector<double>
 	return L_store1;
 }
 
+bool fileExists (string& fileName) 
+{
+	ifstream f(fileName.c_str());
+	if (f.good()) 
+	{
+		f.close();
+		return true;
+	}
+	else 
+	{
+		f.close();
+		return false;
+	}
+}
+
 int main(int argc, char* argv[])
 {
-	string multi_locus_file = argv[1]; //first input is the Multi_locus_trajectories.out file
-	double c = atoi(argv[2]); //second input is the inferred noise parameter C
-	freopen("update.txt","w",stdout); //print out the progress of the optimisation process in a file called update.txt
+	//first check if the input format is right
+	if(argc < 5 || argc > 5) { 
+		cout << "Error in the input format: " << endl << "Please provide Multi_locus_trajectories.out file and noise parameter C" << endl;
+		cout << "If you do not wish to provide a seed number or number of attempts, put 0 (or two 0s separated by a space if you do not wish to provide either) after inputting your file and noise parameter accordingly.";
+		return false;
+	}
+	
+	//taking in the input: first is the Multi_locus_trajectories.out file, second is the C-parameter for noise, third is the seed number, and forth is the number of attempts
+	string multi_locus_file = argv[1];
+	double c = atoi(argv[2]); 
+	int seed = atoi(argv[3]); 
+	unsigned int attempts_max = atoi(argv[4]); 
 
-	if (FILE *file1 = fopen(multi_locus_file.c_str(), "r")) //check whether the Multi_locus_trajectories.out file exists
+	//if only the ‘Multi_locus_trajectories.out’ and C-value is provided, MLHapRec would start with no initial seed number or a priori set of haplotype and reconstruct everything from the scratch.
+	if(argc == 5) {
+		if (seed != 0 && attempts_max == 0)
+		{
+			attempts_max = 20;
+			cout << "You have inputted ‘Multi_locus_trajectories.out’ with a C-value = " << c <<", and seed number = " << seed << ".";
+			cout << " A default number of attemps = " << attempts_max << " is used.";
+			cout << endl << "MLHapRec is now initiated..." << endl;
+		}
+		else if (seed == 0 && attempts_max != 0)
+		{
+			seed = 1;
+			cout << "You have inputted ‘Multi_locus_trajectories.out’ with a C-value = " << c <<", and number of attempts = " << attempts_max << ".";
+			cout << " A default seed number = " << seed << " is used.";
+			cout << endl << "MLHapRec is now initiated..." << endl;
+		}
+		else if (seed == 0 && attempts_max == 0)
+		{
+			seed = 1;
+			attempts_max = 20;
+			cout << "You have inputted ‘Multi_locus_trajectories.out’ with a C-value = " << c <<".";
+			cout << " A default seed number = " << seed << " and number of attempts = " << attempts_max<< " are used.";
+			cout << endl << "MLHapRec is now initiated..." << endl;
+		}
+		
+		else
+		{
+			cout << "You have inputted ‘Multi_locus_trajectories.out’ with a C-value = " << c <<", seed number = " << seed << ", and number of attempts = " << attempts_max << ".";
+			cout << endl << "MLHapRec is now initiated..." << endl;
+		}
+	}
+	
+	
+	gsl_rng_env_setup();
+	gsl_rng *rgen = gsl_rng_alloc(gsl_rng_taus);
+	//seed = (int)time(NULL); uncomment this and it will make the MLHapRec reconstruction outcomes different each time you run the code.
+	gsl_rng_set(rgen, seed); // this is the seed provided by the used. If no seed is provided, then seed=1 is used.
+	
+	freopen("update.txt","w",stdout); //print out the progress of the optimisation process in a file called update.txt
+	if (fileExists(multi_locus_file) == true) //check whether the Multi_locus_trajectories.out file exists
 	{
-		fclose(file1);
 		vector<string> table;
 		ifstream reads;
 		reads.open(multi_locus_file);
@@ -321,89 +372,81 @@ int main(int argc, char* argv[])
 			}
 		}
 		
-		vector<string> loci; //collect the loci numbers from Multi_locus_trajectories.out
-		vector<string> temp;
-		for (unsigned int i = 0; i < rows.size(); i++)
-		{
-			temp = (rows[i]);
-			unsigned int sz = temp.size();
-			for (unsigned int j = 1; j < sz - 6; j++) //according to the current format of SAMFIRE, from the second column all the way to the seventh last column (from the right) contains loci numbers
-			{
-				loci.push_back(rows[i][j]);
-			}
-		}
-		
-		int TOTAL_N = 0; //calculating the total number of reads for all the partial haplotypes -- this quantity is required for BIC calculations 
+		int reads_total = 0; //calculating the total number of reads for all the partial haplotypes -- this quantity is required for BIC calculations 
 		for (unsigned int i=0; i<rows.size(); i++)
 		{
 			unsigned int sz = rows[i].size();
-			string temp_1 = rows[i][sz-1];
-			string temp_2 = rows[i][sz-3];
-			int num_1 = atoi(temp_1.c_str());
-			int num_2 = atoi(temp_2.c_str());
-			TOTAL_N += num_1 + num_2;
+			string reads_before_s = rows[i][sz-1];
+			string reads_after_s = rows[i][sz-3];
+			int reads_before = atoi(reads_before_s.c_str());
+			int reads_after = atoi(reads_after_s.c_str());
+			reads_total += reads_before + reads_after;
 		}
 		
-		vector<int> positions;//The following ~30 lines of code sorts the order of loci from 0 to the last variant locus and store them in Fpositions 
-		for (unsigned int i = 0; i < loci.size(); i++)
-		{
-			int num = atoi(loci.at(i).c_str());
-			positions.push_back(num);
-		}
-		sort(positions.begin(), positions.end());
-		positions.erase(unique(positions.begin(), positions.end()), positions.end());
-		vector<string> Fpositions;
-		for (int i : positions)
-		{
-			Fpositions.push_back(to_string(i));
-		}
-		vector<vector<string>> locus = rows;
-		vector<string> temp1;
+		vector<int> positions; //collect the loci numbers from Multi_locus_trajectories.out
 		for (unsigned int i = 0; i < rows.size(); i++)
 		{
-			temp1 = (rows[i]);
-			unsigned int sz1 = temp1.size();
-			for (unsigned int j = 1; j < sz1 - 6; j++)
+			unsigned int numLoci = atoi(rows[i][0].c_str()); //get the number of loci for the ith row
+			for (unsigned int j = 1; j < 1 + numLoci; j++) //loop over the loci in the file
+			{
+				positions.push_back(atoi((rows[i][j]).c_str()));
+			}
+		}
+		
+		//The following ~30 lines of code sorts the order of loci from 0 to the last variant locus and store them in positions_string 
+		sort(positions.begin(), positions.end());
+		positions.erase(unique(positions.begin(), positions.end()), positions.end()); //up to this point, positions contain a list of all unique loci numbers sorted from smallest to largest, e.g. 121 322 1123 5694
+		vector<string> positions_string; //convert positions to a vector of strings to do comparison on characters
+		for (int i : positions)
+		{
+			positions_string.push_back(to_string(i));
+		}
+		vector<vector<string>> temprows = rows;//we want temprows to include all the information about Multi_locus_trajectories.out BUT with loci numbers that are sorted from 0 to n-1 for each partial haplotype of size n
+		for (unsigned int i = 0; i < rows.size(); i++)//loop over all the rows in Multi_locus_trajectories.out
+		{
+			unsigned int numLoci = atoi(rows[i][0].c_str()); //get the number of loci for the ith row
+			for (unsigned int j = 1; j < 1 + numLoci; j++)//loop over the loci for each partial haplotype (i.e. each row in Multi_locus_trajectories.out)
 			{
 				int count = -1;
-				for (string k : Fpositions)
+				for (string k : positions_string)
 				{
 					count++;
 					if (rows[i][j] == k)
 					{
-						locus[i][j] = " ";
-						locus[i][j] = to_string(count);
+						temprows[i][j] = " ";
+						temprows[i][j] = to_string(count); //what this does is that it would swap the actual loci number from SAMFIRE and re-label it as a sorted integer between [0,n-1] 
 						break;
 					}
 				}
 			}
 		}
+		//the updated rows of temprows are identical to original SAMFIRE Multi_locus_trajectories.out except that the loci are numbered from 0 to n-1
 
 		
 		vector<vector<vector<string>>> partitions; //partitions the partial haplotypes from Multi_locus_trajectories.out into groups with matching loci numbers
-		for (unsigned int k = 1; k <= Fpositions.size(); k++)
+		for (unsigned int k = 1; k <= positions_string.size(); k++)//loop from 1 to n-1
 		{
-			for (unsigned int i = 0; i < Fpositions.size(); i++)
+			for (unsigned int i = 0; i < positions_string.size(); i++)//loop over from 0 to n-1
 			{
-				vector<string> pick;
+				vector<string> pick_row;
 				vector<vector<string>> partialPar;
-				for (unsigned int j = 0; j < locus.size(); j++)
+				for (unsigned int j = 0; j < temprows.size(); j++)//loop over all the rows in Multi_locus_trajectories.out
 				{
-					pick = locus[j];
+					pick_row = temprows[j];
 					string pos_num = to_string(k);
 					unsigned int check_match = 0;
-					if (pick[0] == pos_num)
+					if (pick_row[0] == pos_num)//if partial haplotype j has k number of loci
 					{
-						for (unsigned int m = 0; m < k; m++)
+						for (unsigned int m = 0; m < k; m++)//go over all of loci in partial haplotype j and see if it contains a unique sequence of loci
 						{
-							if (pick[m + 1] == to_string(i + m))
+							if (pick_row[m + 1] == to_string(i + m))
 							{
 								check_match++;
 							}
 						}
-						if (check_match == k)
+						if (check_match == k)//if there is a  perfect match, then it is an element of a given partition set
 						{
-							partialPar.push_back(pick);
+							partialPar.push_back(pick_row);
 						}
 					}
 				}
@@ -414,26 +457,37 @@ int main(int argc, char* argv[])
 			}
 		}
 		
-		vector<string> tampa;//Here we sort each element of a partition set from largest to smallest with respect to the total number of reads
-		for (unsigned int i = 0; i < (partitions).size(); i++)
+		
+		bool changeOccurred = true;
+		while(changeOccurred == true) 
 		{
-			double SIZE0 = (partitions[i]).size();
-			for (unsigned int j = 0; j < SIZE0 - 1; j++)
+			changeOccurred = false;
+			vector<string> sort_by_recipeint; //Here we sort each element of a partition set from largest to smallest with respect to the total number of reads in the recipient 
+			// -- the pattern of sorting should not change if you do it with the donor reads (because it is always the case that a partial haplotype that has the 
+			// highest number of reads in the donor would have the highest number of reads in the recipient)
+			for (unsigned int i = 0; i < (partitions).size(); i++) //go over every element of the partition (defined above)
 			{
-				double SIZE1 = (partitions[i][j]).size();
-				double NUM1 = atoi((partitions[i][j]).at(SIZE1 - 1).c_str());
-				double SIZE2 = (partitions[i][j + 1]).size();
-				double NUM2 = atoi((partitions[i][j + 1]).at(SIZE2 - 1).c_str());
-				if (NUM2 > NUM1)
+				double SIZE0 = (partitions[i]).size();
+				for (unsigned int j = 0; j < SIZE0 - 1; j++)// loop over the elements and sort partial haplotypes based on reads in the recipient
 				{
-					tampa = partitions[i][j];
-					partitions[i][j] = partitions[i][j + 1];
-					partitions[i][j + 1] = tampa;
+					double SIZE1 = (partitions[i][j]).size();//select the jth partial haplotype
+					double NUM1 = atoi((partitions[i][j]).at(SIZE1 - 1).c_str());//SIZE1 - 1 corresponds to the the number of reads in the recipient of every partial haplotype in Multi_locus_trajectories.out
+					double SIZE2 = (partitions[i][j + 1]).size();//select the (j+1)th partial haplotype
+					double NUM2 = atoi((partitions[i][j + 1]).at(SIZE2 - 1).c_str());
+					if (NUM2 > NUM1)
+					{
+						sort_by_recipeint = partitions[i][j];
+						partitions[i][j] = partitions[i][j + 1];
+						partitions[i][j + 1] = sort_by_recipeint;
+						changeOccurred = true;
+					}
 				}
 			}
 		}
 
-		//Uncomment the following lines if you want to see how the jth member of the ith partial haplotype set looks like
+
+
+		//Uncomment the following lines if you want to see how the jth element of the ith partial haplotype set looks like
 		for (unsigned int i = 0; i<partitions.size(); i++)
 		{
 			for (unsigned int j = 0; j<(partitions[i]).size(); j++)
@@ -452,14 +506,10 @@ int main(int argc, char* argv[])
 		{
 			for (unsigned int j = 0; j < (partitions[i]).size(); j++)
 			{
-				vector<string> shuffle_partitions_holder;
-				for (unsigned int k = 0; k < (partitions[i][j]).size(); k++)
-				{
-					shuffle_partitions_holder.push_back(partitions[i][j][k]);
-				}
-				shuffle_partitions.push_back(shuffle_partitions_holder);
+				shuffle_partitions.push_back(partitions[i][j]);
 			}
 		}
+
 		
 		//our 'default' candidate haplotype has no information in it, i.e. it starts with unknown nucleotide X at each position
 		string unknown;
@@ -467,12 +517,13 @@ int main(int argc, char* argv[])
 		{
 			unknown.append("X");
 		}
-			
+					
+		vector<string> candidates;//a list of candidate (or known) haplotypes; The code optimises and appends new ones until BIC value becomes negative	
+		
 		int row_numbers = rows.size();//number of rows in Multi_locus_trajectories.out
-		vector<string> candidates;//a list of candidate haplotypes; starting from 1 haplotype and continue optimising/appending new ones until BIC becomes negative
 		double L_new = -1e7;
 		double L_store = -1e7;
-		double L_preserve_1 = -1e7 - 300;
+		double L_preserve_1 = -1e7 - 1;
 		double L_preserve_2 = -1e7 - 1;
 		double loop = 0; //keeps the track of how big is the candidate haplotype vector (i.e. same as candidates.size())
 		vector<double> all_likelihoods;
@@ -492,21 +543,14 @@ int main(int argc, char* argv[])
 			vector<vector<string>> temp_candidates;
 			int candidate_size1 = candidates.size();
 			//The following loop determines, for a given set of candidate haplotypes, how many attempts we make to optimise the set such that BIC > 0
-			//In the default case, the computer makes 20 attempts to optimize candidates.size() haplotypes.
-			for (unsigned int attempts = 0; attempts < 20; attempts++)
+			//In the default case, the code makes 20 attempts to optimize candidates.size() haplotypes.
+			for (unsigned int attempts = 0; attempts < attempts_max; attempts++)
 			{
 				L_new = L_preserve_2 - 100 / (2*candidate_size1); //try to explore the possible haplotype space locally, i.e. start optimising likelihood from a value close to the previous step of the optimisation with one fewer candidate haplotype
 				L_store = -1e5;
 				candidates[candidate_size1 - 1] = unknown; //the most recent haplotype is unknown
 				double candidate_size = candidates.size();
-				double failure_counts = 0;
-				//This defines the cut-off on when to stop making further attempts to optimize the haplotypes
-				//This depends on loop=number of haplotypes at any time and read_count=total number of partial-reads available.
-				double THRESHOLD = 20 * loop * row_numbers; //depending on how big is the Multi_locus_trajectories.out file and how many haplotypes are already added as potential candidates, the number of attempts to re-shuffling the candidate haplotype set must be adjusted 
-				gsl_rng_env_setup();
-				gsl_rng *rgen = gsl_rng_alloc(gsl_rng_taus);
-				int seed = (int)time(NULL);
-				gsl_rng_set(rgen, seed);
+				double THRESHOLD = attempts_max * loop * row_numbers; //depending on how big is the Multi_locus_trajectories.out file and how many haplotypes are already added as potential candidates, the number of attempts to re-shuffling the candidate haplotype set must be adjusted 
 				vector<double> init_freqs1;//set the initial frequency of candidate haplotypes for the first timepoint to be a randomly distributed number between 0 and 1
 				for (unsigned int i = 0; i < candidates.size() + 1; i++)
 				{
@@ -561,7 +605,7 @@ int main(int argc, char* argv[])
 				}
 
 
-				for (unsigned int s = 0; s < 50*(Fpositions.size()); s++)//set the 'initial conditions' for the most recent (unknown) candidate haplotype using pieces from the partial haplotype set until there are no undetermined loci (X) left
+				for (unsigned int s = 0; s < 50*(positions_string.size()); s++)//set the 'initial conditions' for the most recent (unknown) candidate haplotype using pieces from the partial haplotype set until there are no undetermined loci (X) left
 				{
 					double randomX = floor(shuffle_partitions.size()*gsl_rng_uniform(rgen));
 					string replaceX;
@@ -579,6 +623,7 @@ int main(int argc, char* argv[])
 				
 				double L_store1;//maximum likelihood of the candidate haplotypes given the first timepoint (i.e. donor population)
 				double L_store2;//maximum likelihood of the candidate haplotypes given the second timepoint (i.e. recipient population)
+				double failure_counts = 0;//This defines the cut-off on when to stop making further attempts to optimize the haplotypes
 				while (true)
 				{
 					double j = floor(candidates.size()*gsl_rng_uniform(rgen));//randomly select a candidate haplotype
@@ -628,8 +673,8 @@ int main(int argc, char* argv[])
 						CONTRIBS.push_back(contribs);
 					}
 
-					L_store1 = OptimumFreqs(0, candidates, init_freqs1, CONTRIBS, partitions, c);//optimise the frequencies of + calculate the log-likelihood of the candidate haplotype set with noise parameter c for the first timepoint (i.e. before transmission in the donor population) 
-					L_store2 = OptimumFreqs(1, candidates, init_freqs2, CONTRIBS, partitions, c);//optimise the frequencies of + calculate the log-likelihood of the candidate haplotype set with noise parameter c for the second timepoint (i.e. after transmission in the recipient population)
+					L_store1 = OptimumFreqs(0, candidates, init_freqs1, CONTRIBS, partitions, c, seed);//optimise the frequencies of + calculate the log-likelihood of the candidate haplotype set with noise parameter c for the first timepoint (i.e. before transmission in the donor population) 
+					L_store2 = OptimumFreqs(1, candidates, init_freqs2, CONTRIBS, partitions, c, seed);//optimise the frequencies of + calculate the log-likelihood of the candidate haplotype set with noise parameter c for the second timepoint (i.e. after transmission in the recipient population)
 					L_store = L_store1 + L_store2;//the log-likelihood of the first and second timepoint are independent of each other
 
 					if (L_store > L_new)//if this random change was beneficial (i.e. increased the likelihood of the candidate set)
@@ -692,23 +737,23 @@ int main(int argc, char* argv[])
 						}
 					}
 					
-					int really_bad = 0;
+					int bad_hap = 0;
 					for (unsigned int i = 0; i < candidate_size; i++) //if the frequency of any haplotype is effectively zero before and after the transmission, then it is really not a good candidate and the code has got stuck in a local maximum
 					{	
 						if (init_freqs1_store[i] < 1e-9 && init_freqs2_store[i] < 1e-9)
 						{
-							really_bad++;
+							bad_hap++;
 						}
 					}
 					
-					if (candidates_check == candidate_size - 1 && really_bad == 0)//if there is no duplicate haplotype and their frequencies BOTH before and after tranmission is above 10^-9, optimisation is normal
+					if (candidates_check == candidate_size - 1 && bad_hap == 0)//if there is no duplicate haplotype and their frequencies BOTH before and after tranmission is above 10^-9, optimisation is normal
 					{
 						temp_likelihoods.push_back(L_new);
 						freqs_1.push_back(init_freqs1_store);
 						freqs_2.push_back(init_freqs2_store);
 						temp_candidates.push_back(candidates);
 					}
-					else if (candidates_check != candidate_size - 1 && really_bad != 0)//otherwise, make another attempt to find a better set of haplotypes
+					else if ((candidates_check != candidate_size - 1) || (candidates_check == candidate_size - 1 && bad_hap != 0))//otherwise, make another attempt to find a better set of haplotypes
 					{
 						attempts = attempts - 1;
 					}
@@ -722,7 +767,7 @@ int main(int argc, char* argv[])
 				}
 			}
 			
-			//find which of the 20 attempts had the highest likelihood value
+			//find which of the 20 attempts (default) had the highest likelihood value
 			double max = temp_likelihoods[0];
 			double max_it = 0;
 			for (unsigned int ml = 1; ml < temp_likelihoods.size(); ml++)
@@ -749,7 +794,7 @@ int main(int argc, char* argv[])
 			all_likelihoods.push_back(temp_likelihoods[max_it]);
 			L_preserve_2 = temp_likelihoods[max_it];
 			//the following line calculates the difference between the BIC of the current step and one step before; BIC = -2log(L) + klog(n)
-			BIC_check = -((-2*L_preserve_2)+candidates_size*log (TOTAL_N)) + ((-2*L_preserve_1)+(candidates_size-1)*log (TOTAL_N));
+			BIC_check = -((-2*L_preserve_2)+candidates_size*log (reads_total)) + ((-2*L_preserve_1)+(candidates_size-1)*log (reads_total));
 			if (BIC_check > 0) // if Delta_BIC > 0 --> the current set of N haplotypes are better than the N-1 haplotypes in the previous step
 			{
 				ofstream myfile;
