@@ -28,7 +28,7 @@ for i in HA MP NA NP NS PA PB1 PB2; do #these are the names of the folders for t
 	t=`expr $t + 1`
 done 
 ```
-This creates a folder named `Transmission1_qStar` *(make sure the folder is in your local directory where other folders, including Transmission1, are located)* which contains 8 subfolders named `test_0`, `test_1`, ..., and `test_7` with the corresponding reconstructed haplotype sets saved in the `outcome_1.txt` for each segment `HA`, `MP`, `NA`, `NP`, `NS`, `PA`, `PB1`, and `PB2`, respectively.
+This creates a folder named `Transmission1_qStar` *(make sure the folder is in your local directory where other folders, including Transmission1, are located)* which contains 8 subfolders named `test_0`, `test_1`, ..., and `test_7` with the corresponding reconstructed haplotype sets saved in the `outcome_1.txt` for each segment `HA`, `MP`, `NA`, `NP`, `NS`, `PA`, `PB1`, and `PB2`, respectively. Please check [here](https://github.com/mg878/Haplotype_Reconstruction#usage) for the explanation of `./run_MLHapRec` input format.
 
 Note that this step could take several minutes (hours) depending on how large your Multi_locus_trajectories.out files are.
 
