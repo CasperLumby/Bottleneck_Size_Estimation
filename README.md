@@ -23,7 +23,7 @@ for i in HA MP NA NP NS PA PB1 PB2; do #these are the names of the folders for t
     mkdir test_$t #reconstructed haplotypes for the ith segment (following the alphabetical order above) will be saved in a folder named test_i 
 	cd test_$t
 	echo $i #this shows the segment for which the haplotype reconstruction is currently taking place (note that the progress here could be slow depending on how large is the Multi_locus_trajectories.out
-	/path/to/directory/Codes/MLHapRec/./run_MLHapRec /path/to/directory/Transmission1/$i/Multi_locus_trajectories.out 660
+	/path/to/directory/Codes/MLHapRec/./run_MLHapRec /path/to/directory/Transmission1/$i/Multi_locus_trajectories.out 660 1 10
     cd ..
 	t=`expr $t + 1`
 done 
