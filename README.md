@@ -3,10 +3,8 @@ This repository contains a series of codes to infer the bottleneck size from sho
 
 This project is developed to analyse the transmission bottleneck size of influenza viruses using short-read data from two timepoints, i.e. one before the transmission (in the donor) and one after transmission (in the recipient).   
 
-![2018-06-05 1 41 13](https://github.com/mg878/Bottleneck_Size_Estimation/blob/master/overview.png "Overview")
-
 ## Requirements
-This project requires `Multi_locus_trajectories.out`, `Loci*.dat`, and `Hap_data*.dat` files with an inferred noise parameter `C` from `SAMFIRE`. The files should be available for all the eight (flu type A and B) or seven (C and D) segments of the genome. Create a folder with the name of the segments, i.e. HA, MP, NA, NP, NS, PA, PB1, PB2, and put the corresponding files (mentioned above) into each folder. If some of the segments do not contain a variant, i.e. `Multi_locus_trajectories.out` is empty, please create the corresponding folder and leave it empty.
+This project requires `Multi_locus_trajectories.out`, `Loci*.dat`, and `Hap_data*.dat` files with an inferred noise parameter `C` from `SAMFIRE`. Note that these files may be readily obtained using default commands in [SAMFIRE](https://github.com/cjri/samfire/blob/master/README.md). The files should be available for all the eight (flu type A and B) or seven (C and D) segments of the genome. Create a folder with the name of the segments, i.e. HA, MP, NA, NP, NS, PA, PB1, PB2, and put the corresponding files (mentioned above) into each folder. If some of the segments do not contain a variant, i.e. `Multi_locus_trajectories.out` is empty, please create the corresponding folder and leave it empty.
 
 ## Usage
 To explain the various features of this project, we consider the following example -- All the files created in this example can be found [here](https://github.com/mg878/Bottleneck_Size_Estimation/tree/master/Example).
