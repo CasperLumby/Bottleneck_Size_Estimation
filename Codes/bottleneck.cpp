@@ -556,19 +556,15 @@ int main(int argc, char* argv[]) {
 		return false;
 	}
 	
-	string qStarFilePath;
-	string qStarStarFilePath;
-	if(argc == 3) { 
+	string qStarFilePath = argv[1];
+	string qStarStarFilePath =  argv[2];
 
-		qStarFilePath = argv[1];
-		qStarStarFilePath = argv[2];;;;
-		cout << "You provided the following input file paths:\n";
-		cout << "q* file path: " << qStarFilePath << "\n";
-		cout << "q** file path: " << qStarStarFilePath << "\n";
-		cout << "Bottleneck inference will now be initiated.\n";
-	}
+	cout << "You provided the following input file paths:\n";
+	cout << "q* file path: " << qStarFilePath << "\n";
+	cout << "q** file path: " << qStarStarFilePath << "\n";
+	cout << "Bottleneck inference will now be initiated.\n";
 	
-	//freopen("maximum_likelihood.txt","w",stdout); //This writes the stdout output to maximum_likelihood.txt
+	freopen("maximum_likelihood.txt","w",stdout); //This writes the stdout output to maximum_likelihood.txt
 
 	//Progress with inference only if q* file exists, otherwise print error
 	if (fileExists(qStarFilePath) == true) {
